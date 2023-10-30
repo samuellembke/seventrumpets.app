@@ -1,113 +1,253 @@
-import Image from 'next/image'
+"use client"
+import React, {useEffect, useState} from "react";
+import {
+    Button,
+    ButtonGroup,
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem,
+    Card,
+    CardHeader, Divider, CardBody,
+    Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue
+} from "@nextui-org/react";
+import {ChevronDownIcon} from './ChevronDownIcon';
+import {reduceNumber, sumOfString} from "@/helpers/numerologyHelper";
+import {red} from "color-name";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    const englishAlphabetMap = new Map([
+        ["a", 1],
+        ["b", 2],
+        ["c", 3],
+        ["d", 4],
+        ["e", 5],
+        ["f", 6],
+        ["g", 7],
+        ["h", 8],
+        ["i", 9],
+        ["j", 10],
+        ["k", 11],
+        ["l", 12],
+        ["m", 13],
+        ["n", 14],
+        ["o", 15],
+        ["p", 16],
+        ["q", 17],
+        ["r", 18],
+        ["s", 19],
+        ["t", 20],
+        ["u", 21],
+        ["v", 22],
+        ["w", 23],
+        ["x", 24],
+        ["y", 25],
+        ["z", 26],
+    ])
+
+    const [currentAlphabet, setCurrentAlphabet] = useState<Map<string, number>>(englishAlphabetMap);
+    const [alphabetResultRows, setAlphabetResultRows] = useState<Array<any>>([]);
+    const [calculatorModeSelectedOption, setCalculatorModeSelectedOption] = React.useState(new Set(["word"]));
+    const [wordResultRows, setWordResultRows] = useState<Array<any>>([]);
+    const alphabetColumns = [
+        {
+            key: "letter",
+            label: "LETTER",
+        },
+        {
+            key: "number",
+            label: "NUMBER",
+        }
+    ];
+
+    const calculatorModeDescription = {
+        word: "Reduce Words to numbers",
+        name: "Reduce Names to numbers",
+        lifepath: "Calculate Lifepath numbers",
+    };
+    const calculatorModeLabels = {
+        word: "Reduce Words to numbers",
+        name: "Reduce Names to numbers",
+        lifepath: "Calculate Lifepath numbers",
+    }
+
+    const calculatorModeShortLabels = {
+        word: "Word",
+        name: "Name",
+        lifepath: "Lifepath",
+    }
+
+    const calculatorModeSelectedOptionValue = Array.from(calculatorModeSelectedOption)[0];
+
+    const wordResultColumns = [
+        {
+            key: "name",
+            label: "NAME",
+        },
+        {
+            key: "number",
+            label: "NUMBER",
+        }
+    ];
+
+    const onWordChange = (word: string) => {
+        if (word == null || word.length === 0) {
+            setWordResultRows([]);
+            return;
+        }
+        const sum = sumOfString(word);
+        const reduced = reduceNumber(sum);
+        setWordResultRows([
+            {
+                key: "1",
+                name: "SUM",
+                number: sum
+            },
+            {
+                key: "2",
+                name: "REDUCED",
+                number: reduced
+            }
+        ])
+    }
+
+    useEffect(() => {
+        if (currentAlphabet != null) {
+            // @ts-ignore
+            setAlphabetResultRows([...currentAlphabet.entries()].map((value, index) => {
+                return {
+                    key: index+1,
+                    letter: value[0],
+                    number: value[1]
+                }
+            }))
+        }
+    }, [currentAlphabet])
+
+    return (
+        <div className="flex min-h-screen flex-col items-center justify-start px-20 py-10">
+            <div className="header w-full flex flex-row justify-start items-center mb-16">
+                <p className="fixed font-mono text-sm left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
+                    Seven Trumpets
+                </p>
+            </div>
+            <div className="content w-full grid grid-cols-10 justify-start gap-20 px-6">
+                <Card className="w-full col-span-2">
+                    <CardHeader>
+                        <ButtonGroup className="w-full" variant="flat">
+                            <Button className="w-full text-start justify-start">{ // @ts-ignore
+                                'Alphabet: ' + calculatorModeShortLabels[calculatorModeSelectedOptionValue]
+                            }</Button>
+                            <Dropdown placement="bottom-end">
+                                <DropdownTrigger>
+                                    <Button isIconOnly>
+                                        <ChevronDownIcon />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu
+                                    disallowEmptySelection
+                                    aria-label="Merge options"
+                                    selectedKeys={calculatorModeSelectedOption}
+                                    selectionMode="single"
+                                    onSelectionChange={(val) => {
+                                        // @ts-ignore
+                                        setCalculatorModeSelectedOption(val);
+                                    }}
+                                    className="max-w-[300px]"
+                                >
+                                    <DropdownItem key="word" description={calculatorModeDescription["word"]}>
+                                        {calculatorModeLabels["word"]}
+                                    </DropdownItem>
+                                    <DropdownItem key="name" description={calculatorModeDescription["name"]}>
+                                        {calculatorModeLabels["name"]}
+                                    </DropdownItem>
+                                    <DropdownItem key="lifepath" description={calculatorModeDescription["lifepath"]}>
+                                        {calculatorModeLabels["lifepath"]}
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </ButtonGroup>
+                    </CardHeader>
+                    <Divider />
+                    <CardBody>
+                        <Table>
+                            <TableHeader columns={alphabetColumns}>
+                                {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                            </TableHeader>
+                            <TableBody items={alphabetResultRows}>
+                                {(item) => (
+                                    // @ts-ignore
+                                    <TableRow key={item.key}>
+                                        {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardBody>
+                </Card>
+
+                <Card className="w-full col-span-6 ">
+                    <CardHeader>
+                        <ButtonGroup className="w-full" variant="flat">
+                            <Button className="w-full text-start justify-start">{ // @ts-ignore
+                                'Calculate: ' + calculatorModeShortLabels[calculatorModeSelectedOptionValue]
+                            }</Button>
+                            <Dropdown placement="bottom-end">
+                                <DropdownTrigger>
+                                    <Button isIconOnly>
+                                        <ChevronDownIcon />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu
+                                    disallowEmptySelection
+                                    aria-label="Merge options"
+                                    selectedKeys={calculatorModeSelectedOption}
+                                    selectionMode="single"
+                                    onSelectionChange={(val) => {
+                                        // @ts-ignore
+                                        setCalculatorModeSelectedOption(val);
+                                    }}
+                                    className="max-w-[300px]"
+                                >
+                                    <DropdownItem key="word" description={calculatorModeDescription["word"]}>
+                                        {calculatorModeLabels["word"]}
+                                    </DropdownItem>
+                                    <DropdownItem key="name" description={calculatorModeDescription["name"]}>
+                                        {calculatorModeLabels["name"]}
+                                    </DropdownItem>
+                                    <DropdownItem key="lifepath" description={calculatorModeDescription["lifepath"]}>
+                                        {calculatorModeLabels["lifepath"]}
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </ButtonGroup>
+                    </CardHeader>
+                    <Divider />
+                    <CardBody>
+                        { calculatorModeSelectedOptionValue === 'word' &&
+                            <>
+                                <div className="grid grid-cols-2 gap-x-4">
+                                    <Input type="text" label="Word" onValueChange={onWordChange}></Input>
+                                    <Table>
+                                        <TableHeader columns={wordResultColumns}>
+                                            {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                                        </TableHeader>
+                                        <TableBody items={wordResultRows}>
+                                            {(item) => (
+                                                // @ts-ignore
+                                                <TableRow key={item.key}>
+                                                    {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </>
+                        }
+
+                    </CardBody>
+                </Card>
+            </div>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    )
 }
